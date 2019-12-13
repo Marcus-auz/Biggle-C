@@ -22,7 +22,9 @@ exports.createPost=(req,res,next)=>{
     const error=validationResult(req);
     //response if validation fails
     if(!error.isEmpty()){
-        return res.status(422).json({message:'Validation failed',error:error.array()});
+        const error=new Error('validation failed');
+        error.statusCode=422;
+        throw error;
     }
     //database will be added later
     //parsing data from the incoming request
@@ -41,6 +43,11 @@ exports.createPost=(req,res,next)=>{
             message:'Post created',
             post:result
         });
-    }).catch(err=>{console.log(err)});
+    }).catch(err=>{
+        if(!err.statusCode){
+            err.statusCode=500;
+        }
+        next(err);    
+        });
         
 };
