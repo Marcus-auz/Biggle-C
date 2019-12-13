@@ -35,6 +35,12 @@ exports.createPost=(req,res,next)=>{
         error.statusCode=422;
         throw error;
     }
+    if(!req.file){
+        const error=new Error('No image');
+        error.statusCode=422;
+        throw error;
+    }
+    const imageUrl=req.file.path;
     //database will be added later
     //parsing data from the incoming request
     const title=req.body.title;
@@ -42,7 +48,8 @@ exports.createPost=(req,res,next)=>{
     const post=new Post({
         title:title,
         content:content,
-        imageUrl:'image/rwby.jgp',
+        //imageUrl:'image/rwby.jgp',
+        imageUrl:imageUrl,
         creator:{name:'Auz'}
             
     });
