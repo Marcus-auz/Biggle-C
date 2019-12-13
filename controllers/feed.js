@@ -9,7 +9,7 @@ exports.getPosts=(req,res,next)=>{
                 creator:{
                     name:'Auz'
                 },
-                date :new Date()
+                createdAt :new Date()
             }
         ]
     });
@@ -22,6 +22,13 @@ exports.createPost=(req,res,next)=>{
     const content=req.body.content; 
     res.status(201).json({
         message:'Post created',
-        post:{id:new Date().toISOString(),title:title,content:content}
+        post:
+        {
+            _id:new Date().toISOString(),
+            title:title,
+            content:content,
+            creator:{name:'Auz'},
+            createdAt:new Date()
+        }
     });
 };
