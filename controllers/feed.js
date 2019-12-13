@@ -4,14 +4,25 @@ const fs=require('fs');
 const path=require('path');
 
 exports.getPosts=(req,res,next)=>{
-    Post.find().then(posts=>{
-        res.status(200).json({message:'Posts fetched ',posts:posts})
-    }).catch(err=>{
-        if(!err.statusCode){
-            err.statusCode=500;
-        }
-        next(err);    
-    });
+    const currentPage=req.query.page || 1;
+    const perPage=2; //used bcz it was set in frontend u can use other logic too
+    let totalItems;
+    Post.find().countDocuments()
+        .then(count=>{
+            totalItems=count;
+            return Post.find()
+                .skip((currentPage-1)*perPage)
+                .limit(perPage);
+        }).then(posts=>{
+            res.status(200).json({message:'Posts fetched ',posts:posts,totalItems});
+        })
+        .catch(err=>{
+            if(!err.statusCode){
+                err.statusCode=500;
+            }
+            next(err);    
+        });
+    
     //dummmy response is not deleted since database is connected
     /*res.status(200).json({
         posts:[
@@ -72,6 +83,7 @@ exports.createPost=(req,res,next)=>{
 
 exports.getPost=(req,res,next)=>{
     const postId=req.params.postId;
+
     Post.findById(postId).then(post=>{
         if(!post){
             const error=new Error('Could not find');
