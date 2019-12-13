@@ -1,3 +1,5 @@
+const {validationResult}=require('express-validator/check');
+
 exports.getPosts=(req,res,next)=>{
     res.status(200).json({
         posts:[
@@ -16,6 +18,11 @@ exports.getPosts=(req,res,next)=>{
 };
 
 exports.createPost=(req,res,next)=>{
+    const error=validationResult(req);
+    //response if validation fails
+    if(!error.isEmpty()){
+        return res.status(422).json({message:'Validation failed',error:error.array()});
+    }
     //database will be added later
     //parsing data from the incoming request
     const title=req.body.title;
