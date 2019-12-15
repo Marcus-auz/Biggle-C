@@ -3,6 +3,7 @@ const Post=require('../models/post');
 const User=require('../models/user');
 const fs=require('fs');
 const path=require('path');
+const io=require('../socket');
 
 exports.getPosts=(req,res,next)=>{
     const currentPage=req.query.page || 1;
@@ -12,6 +13,7 @@ exports.getPosts=(req,res,next)=>{
         .then(count=>{
             totalItems=count;
             return Post.find()
+                .populate('creator')
                 .skip((currentPage-1)*perPage)
                 .limit(perPage);
         }).then(posts=>{
@@ -74,6 +76,7 @@ exports.createPost=(req,res,next)=>{
         creator =user;
         user.posts.push(post);
         return user.save();
+        io.getIO().emit('posts',{action:'create ',post:{...post._doc,creator:{_id:req.userId,name:user.name}}});
     }).then(result=>{
         res.status(201).json({
             message:'Post created',
@@ -129,7 +132,7 @@ exports.updatePost=(req,res,next)=>{
         error.statusCode=422;
         throw error;
     }
-    Post.findById(postId).then(post=>{
+    Post.findById(postId).populate('creator').then(post=>{
         if(!post){
             const error=new Error('Could not find');
             error.statusCode=404;
@@ -148,6 +151,7 @@ exports.updatePost=(req,res,next)=>{
         post.imageUrl=imageUrl;
         post.content=content;
         return post.save();
+        io.getIO().emit('posts',{action:'update',post:result})
     }).then(result=>{
         res.status(200).json({message:'Post update',post:result});
     })

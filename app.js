@@ -46,9 +46,13 @@ app.use((error,res,req,next)=>{
     const data=error.data;
     res.status(status).json({message:message,data:data});
 })
-mongoose.connect('URL')
+mongoose.connect('URL')     //use your mongoose atlas connection url
         .then(result=>{
-            app.listen(8080);
+            const server=app.listen(8080);
+            const io=require('./socket').init(server); //function that take created server as an argument
+            io.on('connection',socket=>{
+                console.log('Client connected');
+            });
         })
-        .catch(err=>console.log(err)); //use your mongoose atlas connection url
+        .catch(err=>console.log(err)); 
 
